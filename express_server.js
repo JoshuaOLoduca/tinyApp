@@ -34,7 +34,7 @@ app.post(routes.urls, (req, res) => {
   
   urlDatabase[id] = longURL;
   
-  res.statusCode = 303;
+  res.statusCode = 302;
   res.redirect(`${routes.urls}/${id}`);
   // urlDatabase[Math.floor(Math.random()* 10000)] = '';
 });
@@ -50,7 +50,7 @@ app.get("/:shortURL", (req, res) => {
   const longURL = urlDatabase[shortURL]
   
   if(longURL) {
-    res.statusCode = 303;
+    res.statusCode = 302;
     res.redirect(longURL);
   } else {
     const templateVars = {
