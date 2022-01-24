@@ -16,6 +16,11 @@ const urlDatabase = {
 
 app.set("view engine", "ejs")
 
+// needs to be before /:shortURL
+app.get(routes.urls + '/new', (req, res) => {
+  res.render('urls_new');
+});
+
 app.get(routes.urls + "/:shortURL", (req, res) => {
 
   const id = req.params.shortURL
@@ -45,6 +50,12 @@ app.get(routes.urls, (req, res) => {
   const templateVars = {urls: urlDatabase};
 
   res.render('urls_index', templateVars);
+});
+
+
+app.post(routes.urls, (req, res) => {
+
+  urlDatabase[Math.floor(Math.random()* 10000)] = '';
 });
 
 app.get(routes.urls_dbg, (req, res) => {
