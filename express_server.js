@@ -1,3 +1,4 @@
+const { response } = require("express");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -8,6 +9,25 @@ const urlDatabase = {
 };
 
 app.set("view engine", "ejs")
+
+app.get("/urls/:shortURL", (req, res) => {
+
+  const id = req.params.shortURL
+
+  const templateVars = {
+    shortURL: id,
+    longURL: urlDatabase[id],
+  };
+
+  console.log(urlDatabase[id])
+
+  if(templateVars.longURL) {
+    res.render('url_show',templateVars);
+  } else {
+    res.statusCode = 404;
+    res.send('404 - Url Not Found');
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Hello!");
