@@ -27,15 +27,40 @@ app.get(routes.urls + '/new', (req, res) => {
 app.post(routes.urls, (req, res) => {
   let longURL = req.body.longURL;
   const id = generateRandomString();
-
+  
   if (!longURL.includes('://')) {
     longURL = 'http://' + longURL;
   }
-
+  
   urlDatabase[id] = longURL;
-
+  
+  res.statusCode = 303;
   res.redirect(`${routes.urls}/${id}`);
   // urlDatabase[Math.floor(Math.random()* 10000)] = '';
+});
+
+app.get(routes.urls, (req, res) => {
+  const templateVars = {urls: urlDatabase};
+
+  res.render('urls_index', templateVars);
+});
+
+app.get("/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL]
+  
+  if(longURL) {
+    res.statusCode = 303;
+    res.redirect(longURL);
+  } else {
+    const templateVars = {
+      redirect: routes.urls,
+      redirectText: 'List of Your Urls',
+      display: 'No Shortened Url found',
+    };
+    notFoundRedirect(res, templateVars)
+  }
+
 });
 
 app.get(routes.urls + "/:shortURL", (req, res) => {
@@ -52,10 +77,10 @@ app.get(routes.urls + "/:shortURL", (req, res) => {
   } else {
     const templateVars = {
       redirect: routes.urls,
+      redirectText: 'List of Valid Urls',
       display: 'No Url found',
     };
-    res.statusCode = 404;
-    res.render('404_url', templateVars)
+    notFoundRedirect(res, templateVars)
   }
 });
 
@@ -63,11 +88,6 @@ app.get(routes.main, (req, res) => {
   res.send("Hello!");
 });
 
-app.get(routes.urls, (req, res) => {
-  const templateVars = {urls: urlDatabase};
-
-  res.render('urls_index', templateVars);
-});
 
 app.get(routes.urls_dbg, (req, res) => {
   res.json(urlDatabase);
@@ -102,6 +122,11 @@ function generateRandomString(length = 6) {
 
   return randomString;
 
+}
+
+function notFoundRedirect(resp, templateVars, page = '404_url') {
+  resp.statusCode = 404;
+  resp.render(page, templateVars)
 }
 
 function randomBool() {
