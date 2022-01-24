@@ -25,8 +25,13 @@ app.get(routes.urls + '/new', (req, res) => {
 });
 
 app.post(routes.urls, (req, res) => {
-  const longURL = req.body.longURL;  // Log the POST request body to the console
+  let longURL = req.body.longURL;
   const id = generateRandomString();
+
+  if (!longURL.includes('://')) {
+    longURL = 'http://' + longURL;
+  }
+
   urlDatabase[id] = longURL;
 
   res.send("Ok");
