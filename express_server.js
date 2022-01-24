@@ -25,8 +25,6 @@ app.get(routes.urls + "/:shortURL", (req, res) => {
     longURL: urlDatabase[id],
   };
 
-  console.log(urlDatabase[id])
-
   if(templateVars.longURL) {
     res.render('url_show',templateVars);
   } else {
