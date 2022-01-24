@@ -34,7 +34,7 @@ app.post(routes.urls, (req, res) => {
 
   urlDatabase[id] = longURL;
 
-  res.send("Ok");
+  res.redirect(`${routes.urls}/${id}`);
   // urlDatabase[Math.floor(Math.random()* 10000)] = '';
 });
 
