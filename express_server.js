@@ -3,6 +3,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+const routes = {
+  main: '/',
+  urls: '/urls',
+  urls_dbg: '/urls.json',
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -10,7 +16,7 @@ const urlDatabase = {
 
 app.set("view engine", "ejs")
 
-app.get("/urls/:shortURL", (req, res) => {
+app.get(routes.urls + "/:shortURL", (req, res) => {
 
   const id = req.params.shortURL
 
@@ -24,22 +30,26 @@ app.get("/urls/:shortURL", (req, res) => {
   if(templateVars.longURL) {
     res.render('url_show',templateVars);
   } else {
+    const templateVars = {
+      redirect: routes.urls,
+      display: 'No Url found',
+    };
     res.statusCode = 404;
-    res.send('404 - Url Not Found');
+    res.render('404_url', templateVars)
   }
 });
 
-app.get("/", (req, res) => {
+app.get(routes.main, (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls", (req, res) => {
+app.get(routes.urls, (req, res) => {
   const templateVars = {urls: urlDatabase};
 
   res.render('urls_index', templateVars);
 });
 
-app.get("/urls.json", (req, res) => {
+app.get(routes.urls_dbg, (req, res) => {
   res.json(urlDatabase);
 });
 
