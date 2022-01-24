@@ -8,7 +8,7 @@ const PORT = 8080; // default port 8080
 const routes = {
   main: '/',
   urls: '/urls',
-  urls_dbg: '/urls.json',
+  urlsDbg: '/urls.json',
 };
 
 const urlDatabase = {
@@ -16,7 +16,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.set("view engine", "ejs")
+app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
 // needs to be before /:shortURL
@@ -46,10 +46,10 @@ app.get(routes.urls, (req, res) => {
 });
 
 app.get("/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL
-  const longURL = urlDatabase[shortURL]
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
   
-  if(longURL) {
+  if (longURL) {
     res.statusCode = 302;
     res.redirect(longURL);
   } else {
@@ -58,21 +58,21 @@ app.get("/:shortURL", (req, res) => {
       redirectText: 'List of Your Urls',
       display: 'No Shortened Url found',
     };
-    notFoundRedirect(res, templateVars)
+    notFoundRedirect(res, templateVars);
   }
 
 });
 
 app.get(routes.urls + "/:shortURL", (req, res) => {
 
-  const id = req.params.shortURL
+  const id = req.params.shortURL;
 
   const templateVars = {
     shortURL: id,
     longURL: urlDatabase[id],
   };
 
-  if(templateVars.longURL) {
+  if (templateVars.longURL) {
     res.render('url_show',templateVars);
   } else {
     const templateVars = {
@@ -80,7 +80,7 @@ app.get(routes.urls + "/:shortURL", (req, res) => {
       redirectText: 'List of Valid Urls',
       display: 'No Url found',
     };
-    notFoundRedirect(res, templateVars)
+    notFoundRedirect(res, templateVars);
   }
 });
 
@@ -89,7 +89,7 @@ app.get(routes.main, (req, res) => {
 });
 
 
-app.get(routes.urls_dbg, (req, res) => {
+app.get(routes.urlsDbg, (req, res) => {
   res.json(urlDatabase);
 });
 
@@ -102,8 +102,8 @@ function generateRandomString(length = 6) {
   const numbers = '0123456789'.split('');
   let randomString = '';
 
-  for(let i = 0; i < length; i++) {
-    let nextIsChar = randomBool()
+  for (let i = 0; i < length; i++) {
+    let nextIsChar = randomBool();
 
     if (nextIsChar) {
       let charIndex = randomNumberInclusive(25);
@@ -112,7 +112,7 @@ function generateRandomString(length = 6) {
       if (upperCase) {
         randomString += chars[charIndex].toUpperCase();
       } else {
-        randomString += chars[charIndex]
+        randomString += chars[charIndex];
       }
       continue;
     }
@@ -126,7 +126,7 @@ function generateRandomString(length = 6) {
 
 function notFoundRedirect(resp, templateVars, page = '404_url') {
   resp.statusCode = 404;
-  resp.render(page, templateVars)
+  resp.render(page, templateVars);
 }
 
 function randomBool() {
@@ -135,5 +135,5 @@ function randomBool() {
 
 // returns a result from 0 to, and including, num
 function randomNumberInclusive(num) {
-  return Math.floor(Math.random() * (num + 1))
+  return Math.floor(Math.random() * (num + 1));
 }
