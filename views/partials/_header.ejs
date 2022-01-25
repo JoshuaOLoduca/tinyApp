@@ -4,22 +4,26 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="collapse navbar-collapse justify-content-between" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+      <div>
       <% if (!username) { %> 
-      <form method="POST" action="/login">
-        <input type="text" placeholder="Desired Username" name="username">
-        <button type="submit">Set Username</button>
+      <form class="d-flex" style="gap: .8rem;" method="POST" action="/login">
+        <input class="form-control" type="text" placeholder="Desired Username" name="username">
+        <button class="btn btn-outline-dark" type="submit">Login</button>
       </form>
       <% } else { %>
-        <span>Welcome <%= username %></span>
-        <form method="POST" action="/logout">
-          <button type="submit">Logout</button>
-        </form>
-        <% } %> 
+        <div class="d-flex" style="gap: .8rem;">
+          <span style="margin: auto 0;">Welcome <%= username %></span>
+          <form method="POST" action="/logout">
+            <button class="btn btn-outline-dark" type="submit">Logout</button>
+          </form>
+        </div>
+      <% } %>
+      </div>
     </div>
   </nav>
 </header>
