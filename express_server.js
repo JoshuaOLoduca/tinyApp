@@ -16,16 +16,27 @@ const routes = {
   register: '/register',
 };
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
 
 const userDatabase = { 
-  "userRandomID": {
-    id: "userRandomID", 
+  "aJ48lW": {
+    id: "aJ48lW", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "asd"
   },
  "user2RandomID": {
     id: "user2RandomID", 
@@ -119,13 +130,19 @@ function appGets() {
   });
 
   app.get(routes.urls + '/new', (req, res) => {
+    const id = req.cookies.user_id
+    const user = getUserById(id);
+    if (!user) {
+      res.redirect(routes.login)
+    }
     res.render('urls_new');
   });
 
   app.get(routes.urls, (req, res) => {
+    const id = req.cookies.user_id;
     const templateVars = {
-      user: getUserById(req.cookies.user_id),
-      urls: urlDatabase
+      user: getUserById(id),
+      urls: getUrlsForUserID(id, urlDatabase)
     };
   
     res.render('urls_index', templateVars);
@@ -133,9 +150,10 @@ function appGets() {
   
   app.get("/:shortURL", (req, res) => {
     const shortURL = req.params.shortURL;
-    const longURL = urlDatabase[shortURL];
+    // console.log("Testing: ", longURL);
     
-    if (longURL) {
+    if (urlDatabase[shortURL]) {
+      const longURL = urlDatabase[shortURL].longURL;
       res.statusCode = 302;
       res.redirect(longURL);
     } else {
@@ -212,7 +230,17 @@ function generateRandomString(length = 6) {
 // ///////////////////
 // HELPERS
 // ///////////////////
-const login = (req,res) => {
+function getUrlsForUserID(userId, urlDb) {
+  const urls = {};
+  for (const id in urlDb) {
+    if (urlDb[id].userID === userId) {
+      urls[id] = urlDb[id];
+    }
+  }
+  return urls;
+};
+
+function login(req,res) {
   const {email, password} = req.body;
   const userExists = doesUserExist(email, userDatabase);
   if (!userExists) {
