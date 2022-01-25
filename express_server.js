@@ -2,6 +2,7 @@ const { response } = require("express");
 const express = require("express");
 const bodyParser = require("body-parser");
 const { resolveInclude } = require("ejs");
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -18,6 +19,7 @@ const urlDatabase = {
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser())
 
 // needs to be before /:shortURL
 
@@ -44,7 +46,7 @@ function appPosts() {
     if (!longURL.includes('://')) {
       longURL = 'http://' + longURL;
     }
-    
+
     urlDatabase[shortURL] = longURL;
 
     res.redirect(`${routes.urls}/${shortURL}`);
