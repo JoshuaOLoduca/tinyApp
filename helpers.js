@@ -91,7 +91,7 @@ function generateRandomString(length = 6) {
 function addUrlToDatabase(userID, url, urlDb) {
   const id = generateRandomString();
 
-  if (!longURL.includes('://')) {
+  if (!url.includes('://')) {
     url = 'http://' + url;
   }
   
