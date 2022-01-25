@@ -2,7 +2,8 @@ const { response } = require("express");
 const express = require("express");
 const bodyParser = require("body-parser");
 const { resolveInclude } = require("ejs");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const { use } = require("express/lib/router");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -20,6 +21,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const userDatabase = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser())
@@ -34,14 +48,30 @@ app.listen(PORT, () => {
 });
 
 function appPosts() {
+  
+  app.post(routes.register, (req, res) => {
+    const {email, password} = req.body;
+    const userId = createUser(email, password);
 
-  app.post(routes.login, (req, res) => {
-    res.cookie('username', req.body.username);
-    res.redirect(routes.urls);
+    if (userId) {
+      req.body.userId = userId;
+      return login(req, res);
+    }
+    res.statusCode = 400;
+    res.json({err: 'User wasnt created'})
   });
 
+  app.post(routes.login, (req, res) => {
+    login(req, res);
+  });
+
+  const login = (req,res) => {
+    res.cookie('user_id', req.body.userId);
+    res.redirect(routes.urls);
+  };
+
   app.post(routes.logout, (req, res) => {
-    res.clearCookie('username');
+    res.clearCookie('user_id');
     res.redirect(routes.urls);
   });
 
@@ -95,7 +125,7 @@ function appGets() {
 
   app.get(routes.urls, (req, res) => {
     const templateVars = {
-      username: req.cookies.username,
+      user: getUser(req.cookies.user_id),
       urls: urlDatabase
     };
   
@@ -111,7 +141,7 @@ function appGets() {
       res.redirect(longURL);
     } else {
       const templateVars = {
-        username: req.cookies.username,
+        user: getUser(req.cookies.user_id),
         redirect: routes.urls,
         redirectText: 'List of Your Urls',
         display: 'No Shortened Url found',
@@ -126,7 +156,7 @@ function appGets() {
     const id = req.params.shortURL;
   
     const templateVars = {
-      username: req.cookies.username,
+      user: getUser(req.cookies.user_id),
       shortURL: id,
       longURL: urlDatabase[id],
     };
@@ -135,7 +165,7 @@ function appGets() {
       res.render('url_show',templateVars);
     } else {
       const templateVars = {
-        username: req.cookies.username,
+        user: getUser(req.cookies.user_id),
         redirect: routes.urls,
         redirectText: 'List of Valid Urls',
         display: 'No Url found',
@@ -180,7 +210,35 @@ function generateRandomString(length = 6) {
   return randomString;
 
 }
+// ///////////////////
+// HELPERS
+// ///////////////////
+function getUser(id){
+  return userDatabase[id];
+}
 
+function createUser(email, password) {
+  const existsAlready = doesUserExist(email, userDatabase)
+  if (existsAlready || !email || !password) return false;
+
+  const id = generateRandomString(12)
+  userDatabase[id] = {
+    id: id,
+    email: email,
+    password: password
+  }
+  const gotCreated = email === userDatabase[id].email;
+  return gotCreated ? id : false;
+};
+
+function doesUserExist(email, userDB) {
+  for (const id in userDB) {
+      if (userDB[id].email === email) {
+        return true;
+      }
+  }
+  return false;
+}
 
 function notFoundRedirect(resp, templateVars, page = '404_url') {
   resp.statusCode = 404;

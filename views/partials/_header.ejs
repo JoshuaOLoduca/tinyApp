@@ -10,14 +10,14 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div>
-      <% if (!locals.username) { %> 
+      <% if (!locals.user) { %> 
       <form class="d-flex" style="gap: .8rem;" method="POST" action="/login">
         <input class="form-control" type="text" placeholder="Desired Username" name="username">
         <button class="btn btn-outline-dark" type="submit">Login</button>
       </form>
       <% } else { %>
         <div class="d-flex" style="gap: .8rem;">
-          <span style="margin: auto 0;">Welcome <%= username %></span>
+          <span style="margin: auto 0;">Welcome <%= user.email %></span>
           <form method="POST" action="/logout">
             <button class="btn btn-outline-dark" type="submit">Logout</button>
           </form>
