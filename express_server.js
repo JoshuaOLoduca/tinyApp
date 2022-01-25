@@ -254,6 +254,10 @@ function appGets() {
   });
   
   app.get(routes.main, (req, res) => {
+    const userId = req.session.user_id;
+    if (userId) {
+      return res.redirect(routes.urls)
+    }
     res.redirect(routes.login);
   });
   
