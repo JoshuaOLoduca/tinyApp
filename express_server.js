@@ -232,6 +232,17 @@ function appGets() {
     console.log(userId);
     const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
 
+    if (!userId) {
+      req.statusCode = 403;
+      notFoundRedirect(req, res,
+        {
+          url: routes.login,
+          message: 'Login Here'
+        },
+        'You are not logged in'
+        );
+    }
+
     if (!doesUserOwnUrl) {
       req.statusCode = 401;
       notFoundRedirect(req, res,
