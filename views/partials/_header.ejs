@@ -11,10 +11,18 @@
       </div>
       <div>
       <% if (!locals.user) { %> 
-      <form class="d-flex" style="gap: .8rem;" method="POST" action="/login">
+      <!-- <form class="d-flex" style="gap: .8rem;" method="POST" action="/login">
         <input class="form-control" type="text" placeholder="Desired Username" name="username">
         <button class="btn btn-outline-dark" type="submit">Login</button>
-      </form>
+      </form> -->
+      <div class="d-flex" style="gap: .8rem;">
+        <form method="GET" action="/register">
+          <button class="btn btn-primary" type="submit">Register</button>
+        </form>
+        <form method="GET" action="/login">
+          <button class="btn btn-outline-dark" type="submit">Login</button>
+        </form>
+      </div>
       <% } else { %>
         <div class="d-flex" style="gap: .8rem;">
           <span style="margin: auto 0;">Welcome <%= user.email %></span>

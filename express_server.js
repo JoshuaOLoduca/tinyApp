@@ -65,11 +65,6 @@ function appPosts() {
     login(req, res);
   });
 
-  const login = (req,res) => {
-    res.cookie('user_id', req.body.userId);
-    res.redirect(routes.urls);
-  };
-
   app.post(routes.logout, (req, res) => {
     res.clearCookie('user_id');
     res.redirect(routes.urls);
@@ -113,6 +108,10 @@ function appPosts() {
 }
 
 function appGets() {
+  app.get(routes.login, (req, res) => {
+    res.render('login');
+  });
+
   app.get(routes.register, (req, res) => {
     const templateVars = {
     };
@@ -125,7 +124,7 @@ function appGets() {
 
   app.get(routes.urls, (req, res) => {
     const templateVars = {
-      user: getUser(req.cookies.user_id),
+      user: getUserById(req.cookies.user_id),
       urls: urlDatabase
     };
   
@@ -141,7 +140,7 @@ function appGets() {
       res.redirect(longURL);
     } else {
       const templateVars = {
-        user: getUser(req.cookies.user_id),
+        user: getUserById(req.cookies.user_id),
         redirect: routes.urls,
         redirectText: 'List of Your Urls',
         display: 'No Shortened Url found',
@@ -156,7 +155,7 @@ function appGets() {
     const id = req.params.shortURL;
   
     const templateVars = {
-      user: getUser(req.cookies.user_id),
+      user: getUserById(req.cookies.user_id),
       shortURL: id,
       longURL: urlDatabase[id],
     };
@@ -165,7 +164,7 @@ function appGets() {
       res.render('url_show',templateVars);
     } else {
       const templateVars = {
-        user: getUser(req.cookies.user_id),
+        user: getUserById(req.cookies.user_id),
         redirect: routes.urls,
         redirectText: 'List of Valid Urls',
         display: 'No Url found',
@@ -213,7 +212,34 @@ function generateRandomString(length = 6) {
 // ///////////////////
 // HELPERS
 // ///////////////////
-function getUser(id){
+const login = (req,res) => {
+  const {email, password} = req.body;
+  const userExists = doesUserExist(email, userDatabase);
+  if (!userExists) {
+    res.statusCode = 400;
+    res.json({err: 'No User Found'})
+    return;
+  }
+  const user = getUserByEmail(email, userDatabase);
+  if (user.password !== password) {
+    res.statusCode = 400;
+    res.json({err: 'Wrong Password'})
+    return;
+  }
+  res.cookie('user_id', user.id);
+  res.redirect(routes.urls);
+};
+
+function getUserByEmail(email, userDB){
+  for (const id in userDB) {
+    if (userDB[id].email === email) {
+      return userDB[id];
+    }
+  }
+  return false;
+}
+
+function getUserById(id){
   return userDatabase[id];
 }
 
