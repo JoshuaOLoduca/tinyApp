@@ -97,9 +97,12 @@ function addUrlToDatabase(userID, url, urlDb) {
   
   urlDb[id] = {
     longURL: url,
-    userID: userID
-  };
+    userID: userID,
+    uniqueVisitors: [],
+    totalVisits: 0,
+    created: Date(Date.now())
 
+  };
   return id;
 }
 

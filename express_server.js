@@ -62,7 +62,6 @@ function appPosts() {
         'Email and password MUST BE FILLED');
     }
 
-    console.log(userDatabase)
     if (userId) {
       req.body.userId = userId;
       return login(req, res);
@@ -196,10 +195,15 @@ function appGets() {
   
   app.get("/:shortURL", (req, res) => {
     const shortURL = req.params.shortURL;
-    // console.log("Testing: ", longURL);
     
     if (urlDatabase[shortURL]) {
       const longURL = urlDatabase[shortURL].longURL;
+      const ip = req.ip;
+      const isUniqueVisitor = !urlDatabase[shortURL].uniqueVisitors.includes(ip);
+      urlDatabase[shortURL].totalVisits++;
+      if (isUniqueVisitor) {
+        urlDatabase[shortURL].uniqueVisitors.push(req.ip);
+      }
       res.statusCode = 302;
       res.redirect(longURL);
     } else {
@@ -217,7 +221,6 @@ function appGets() {
   app.get(routes.urls + "/:shortURL", (req, res) => {
     const id = req.params.shortURL;
     const userId = req.session.user_id;
-    console.log(userId);
     const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
 
     if (!userId) {
@@ -231,7 +234,7 @@ function appGets() {
     const templateVars = {
       user: getUserById(req.session.user_id, userDatabase),
       shortURL: id,
-      longURL: urlDatabase[id].longURL,
+      urlData: urlDatabase[id],
       domain: req.get('host')
     };
   

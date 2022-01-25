@@ -12,8 +12,16 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h4 class="card-title">TinyURL for: <%= longURL %></h4>
+        <h4 class="card-title">TinyURL for: <%= urlData.longURL %></h4>
+        
         <p class="card-text">Short URL: <a href="/<%= shortURL %>"><%= domain %>/<%= shortURL %></a></p>
+
+        <p class="card-text">Unique Users: <%= urlData.uniqueVisitors.length %>
+
+        <p class="card-text">Total Uses: <%= urlData.totalVisits %></p>
+
+        <p class="card-text">Created: <%= urlData.created %></a></p>
+
       </div>
       <div class="card-footer text-muted">
         <h2 class="card-title font-weight-bold">Edit</h2>

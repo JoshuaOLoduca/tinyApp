@@ -23,6 +23,9 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Unique Users</th>
+          <th scope="col">Total Uses</th>
+          <th scope="col">Created</th>
           <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
@@ -40,6 +43,17 @@
                 <%= urls[id].longURL %>
               </a>
             </td>
+
+            <td>
+              <%= urls[id].uniqueVisitors.length %>
+            </td>
+            <td>
+              <%= urls[id].totalVisits %>
+            </td>
+            <td>
+              <%= urls[id].created %>
+            </td>
+
             <td>
               <form method="GET" action="/urls/<%=id%>">
                 <button class="btn btn-outline-primary" type="submit">Edit</button>

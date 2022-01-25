@@ -3,11 +3,17 @@ const {bcrypt, salt} = require('./myBcrypt');
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
+    userID: "aJ48lW",
+    uniqueVisitors: [],
+    totalVisits: 0,
+    created: Date(Date.now())
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW"
+    userID: "aJ48lW",
+    uniqueVisitors: [],
+    totalVisits: 0,
+    created: Date(Date.now())
   }
 };
 
