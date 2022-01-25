@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const { resolveInclude } = require("ejs");
 const cookieParser = require('cookie-parser');
 const { use } = require("express/lib/router");
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -16,10 +17,7 @@ const routes = {
   register: '/register',
 };
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
+const salt = bcrypt.genSaltSync(10);
 
 const urlDatabase = {
   b6UTxQ: {
@@ -36,12 +34,12 @@ const userDatabase = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "user@example.com",
-    password: "asd"
+    password: bcrypt.hashSync("asd", salt),
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", salt)
   }
 };
 
@@ -301,7 +299,7 @@ function login(req,res) {
     return;
   }
   const user = getUserByEmail(email, userDatabase);
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     res.statusCode = 400;
     res.json({err: 'Wrong Password'});
     return;
@@ -331,7 +329,7 @@ function createUser(email, password) {
   userDatabase[id] = {
     id: id,
     email: email,
-    password: password
+    password:  bcrypt.hashSync(password, salt)
   };
   const gotCreated = email === userDatabase[id].email;
   return gotCreated ? id : false;
