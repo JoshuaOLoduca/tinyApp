@@ -254,7 +254,7 @@ function appGets() {
   });
   
   app.get(routes.main, (req, res) => {
-    res.send("Hello!");
+    res.redirect(route.login);
   });
   
   
