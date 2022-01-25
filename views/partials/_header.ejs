@@ -10,7 +10,7 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div>
-      <% if (!username) { %> 
+      <% if (!locals.username) { %> 
       <form class="d-flex" style="gap: .8rem;" method="POST" action="/login">
         <input class="form-control" type="text" placeholder="Desired Username" name="username">
         <button class="btn btn-outline-dark" type="submit">Login</button>

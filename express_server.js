@@ -12,6 +12,7 @@ const routes = {
   urlsDbg: '/urls.json',
   login: '/login',
   logout: '/logout',
+  register: '/register',
 };
 
 const urlDatabase = {
@@ -82,6 +83,12 @@ function appPosts() {
 }
 
 function appGets() {
+  app.get(routes.register, (req, res) => {
+    const templateVars = {
+    };
+    res.render('register');
+  });
+
   app.get(routes.urls + '/new', (req, res) => {
     res.render('urls_new');
   });
