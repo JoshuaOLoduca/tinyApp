@@ -175,6 +175,7 @@ function appGets() {
     const user = getUserById(id);
     if (!user) {
       res.redirect(routes.login);
+      return;
     }
     res.render('urls_new');
   });
