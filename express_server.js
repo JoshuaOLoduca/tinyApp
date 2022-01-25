@@ -13,7 +13,9 @@ const {
   getUrlsForUserID,
   doesUserExist,
   doesUserOwn,
+  addUrlToDatabase,
   } = require('./helpers');
+const {urlDatabase, userDatabase} = require('./databases');
 const { bcrypt, salt} = require('./myBcrypt');
 const req = require("express/lib/request");
 const app = express();
@@ -26,31 +28,6 @@ const routes = {
   login: '/login',
   logout: '/logout',
   register: '/register',
-};
-
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW"
-  }
-};
-
-const userDatabase = {
-  "aJ48lW": {
-    id: "aJ48lW",
-    email: "user@example.com",
-    password: bcrypt.hashSync("asd", salt),
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: bcrypt.hashSync("dishwasher-funk", salt)
-  }
 };
 
 app.set("view engine", "ejs");
@@ -82,7 +59,7 @@ function appPosts() {
       req.body.userId = userId;
       return login(req, res);
     }
-    res.statusCode = 400;
+    req.statusCode = 400;
     res.json({err: 'User wasnt created'});
   });
 
@@ -92,7 +69,7 @@ function appPosts() {
 
   app.post(routes.logout, (req, res) => {
     req.session = null;
-    res.redirect(routes.urls);
+    res.redirect(routes.main);
   });
 
   app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
@@ -103,13 +80,13 @@ function appPosts() {
 
     // if user isnt logged in
     if (!user) {
-      res.statusCode = 401;
+      req.statusCode = 401;
       res.redirect(routes.login);
       return;
     }
 
     if (usersUrl.userID !== id) {
-      res.statusCode = 401;
+      req.statusCode = 401;
       res.redirect(routes.urls);
       return;
     }
@@ -128,13 +105,13 @@ function appPosts() {
 
     // if user isnt logged in
     if (!user) {
-      res.statusCode = 401;
+      req.statusCode = 401;
       res.redirect(routes.login);
       return;
     }
 
     if (usersUrl.userID !== id) {
-      res.statusCode = 401;
+      req.statusCode = 401;
       res.redirect(routes.urls);
       return;
     }
@@ -152,26 +129,16 @@ function appPosts() {
     let longURL = req.body.longURL;
     const userID = req.session.user_id;
     const user = getUserById(userID, userDatabase);
-    const id = generateRandomString();
 
     if (!user) {
-      res.statusCode = 401;
-      res.redirect(routes.register);
+      req.statusCode = 401;
+      redirectAnonUserToError(req, res)
       return;
     }
+    const id = addUrlToDatabase(userID, longURL, urlDatabase)
     
-    if (!longURL.includes('://')) {
-      longURL = 'http://' + longURL;
-    }
-    
-    urlDatabase[id] = {
-      longURL: longURL,
-      userID: userID
-    };
-    
-    res.statusCode = 302;
+    req.statusCode = 302;
     res.redirect(`${routes.urls}/${id}`);
-    // urlDatabase[Math.floor(Math.random()* 10000)] = '';
   });
 }
 
@@ -181,8 +148,6 @@ function appGets() {
   });
 
   app.get(routes.register, (req, res) => {
-    const templateVars = {
-    };
     res.render('register');
   });
 
@@ -216,16 +181,16 @@ function appGets() {
     
     if (urlDatabase[shortURL]) {
       const longURL = urlDatabase[shortURL].longURL;
-      res.statusCode = 302;
+      req.statusCode = 302;
       res.redirect(longURL);
     } else {
-      const templateVars = {
-        user: getUserById(req.session.user_id, userDatabase),
-        redirect: routes.urls,
-        redirectText: 'List of Your Urls',
-        display: 'No Shortened Url found',
-      };
-      renderErrorPage(res, templateVars);
+      req.statusCode = 404;
+      renderErrorPage(req, res, {
+        url: routes.urls,
+        message: 'List of Your Urls'
+      },
+      'No Shortened Url found'
+      );
     }
   
   });
@@ -282,13 +247,13 @@ function login(req,res) {
   const {email, password} = req.body;
   const userExists = doesUserExist(email, userDatabase);
   if (!userExists) {
-    res.statusCode = 400;
+    req.statusCode = 400;
     res.json({err: 'No User Found'});
     return;
   }
   const user = getUserByEmail(email, userDatabase);
   if (!bcrypt.compareSync(password, user.password)) {
-    res.statusCode = 400;
+    req.statusCode = 400;
     res.json({err: 'Wrong Password'});
     return;
   }

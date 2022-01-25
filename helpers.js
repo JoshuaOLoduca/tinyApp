@@ -88,6 +88,22 @@ function generateRandomString(length = 6) {
 
 }
 
+function addUrlToDatabase(userID, url, urlDb) {
+  const id = generateRandomString();
+
+  if (!longURL.includes('://')) {
+    url = 'http://' + url;
+  }
+  
+  urlDb[id] = {
+    longURL: url,
+    userID: userID
+  };
+
+  return id;
+}
+
+
 module.exports = {
   createUser,
   getUserById,
@@ -96,4 +112,5 @@ module.exports = {
   getUrlsForUserID,
   doesUserExist,
   doesUserOwn,
+  addUrlToDatabase,
   }
