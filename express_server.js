@@ -37,6 +37,19 @@ function appPosts() {
     res.redirect(routes.urls);
   });
 
+  app.post(`${routes.urls}/:shortURL`, (req, res) => {
+    let shortURL = req.params.shortURL;
+    let longURL = req.body.longURL;
+
+    if (!longURL.includes('://')) {
+      longURL = 'http://' + longURL;
+    }
+    
+    urlDatabase[shortURL] = longURL;
+
+    res.redirect(`${routes.urls}/${shortURL}`);
+  });
+
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
     const id = generateRandomString();
