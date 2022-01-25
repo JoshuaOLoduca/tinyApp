@@ -15,6 +15,7 @@ const {
   doesUserOwn,
   } = require('./helpers');
 const { bcrypt, salt} = require('./myBcrypt');
+const req = require("express/lib/request");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -228,10 +229,18 @@ function appGets() {
   app.get(routes.urls + "/:shortURL", (req, res) => {
     const id = req.params.shortURL;
     const userId = req.session.user_id;
+    console.log(userId);
     const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
 
     if (!doesUserOwnUrl) {
-      res.redirect(routes.urls);
+      req.statusCode = 401;
+      notFoundRedirect(req, res,
+        {
+          url: routes.urls,
+          message: 'List of Your Urls'
+        },
+        'You dont own this url'
+        );
     }
   
     const templateVars = {
@@ -240,17 +249,8 @@ function appGets() {
       longURL: urlDatabase[id].longURL,
     };
   
-    if (templateVars.longURL) {
-      res.render('url_show',templateVars);
-    } else {
-      const templateVars = {
-        user: getUserById(req.session.user_id, userDatabase),
-        redirect: routes.urls,
-        redirectText: 'List of Valid Urls',
-        display: 'No Url found',
-      };
-      notFoundRedirect(res, templateVars);
-    }
+    res.render('url_show',templateVars);
+
   });
   
   app.get(routes.main, (req, res) => {
@@ -288,7 +288,14 @@ function login(req,res) {
   res.redirect(routes.urls);
 }
 
-function notFoundRedirect(resp, templateVars, page = '404_url') {
-  resp.statusCode = 404;
+function notFoundRedirect(req, resp, redirect, errorMessage, page = 'error_url') {
+  console.log(req.statusCode);
+  const templateVars = {
+    user: getUserById(
+      req.session.user_id, userDatabase),
+    redirect: redirect.url,
+    redirectText: redirect.message,
+    display: `${req.statusCode} - ${errorMessage}`,
+  };
   resp.render(page, templateVars);
 }

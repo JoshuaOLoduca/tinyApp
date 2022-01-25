@@ -1,6 +1,7 @@
 const { bcrypt, salt} = require('./myBcrypt');
 
 function doesUserOwn(userId, shortId, urlDb) {
+  if (!urlDb[shortId]) return false;
   return urlDb[shortId].userID === userId;
 }
 
