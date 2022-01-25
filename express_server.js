@@ -23,31 +23,31 @@ const routes = {
 
 const urlDatabase = {
   b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
   },
   i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "aJ48lW"
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
   }
 };
 
-const userDatabase = { 
+const userDatabase = {
   "aJ48lW": {
-    id: "aJ48lW", 
-    email: "user@example.com", 
+    id: "aJ48lW",
+    email: "user@example.com",
     password: "asd"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser())
+app.use(cookieParser());
 
 // needs to be before /:shortURL
 
@@ -69,7 +69,7 @@ function appPosts() {
       return login(req, res);
     }
     res.statusCode = 400;
-    res.json({err: 'User wasnt created'})
+    res.json({err: 'User wasnt created'});
   });
 
   app.post(routes.login, (req, res) => {
@@ -88,7 +88,7 @@ function appPosts() {
     const usersUrl = urlDatabase[shortURL];
 
     // if user isnt logged in
-    if(!user) {
+    if (!user) {
       res.statusCode = 401;
       res.redirect(routes.login);
       return;
@@ -113,7 +113,7 @@ function appPosts() {
     const usersUrl = urlDatabase[shortURL];
 
     // if user isnt logged in
-    if(!user) {
+    if (!user) {
       res.statusCode = 401;
       res.redirect(routes.login);
       return;
@@ -137,7 +137,7 @@ function appPosts() {
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
     const userID = req.cookies.user_id;
-    const user = getUserById(userID)
+    const user = getUserById(userID);
     const id = generateRandomString();
 
     if (!user) {
@@ -173,10 +173,10 @@ function appGets() {
   });
 
   app.get(routes.urls + '/new', (req, res) => {
-    const id = req.cookies.user_id
+    const id = req.cookies.user_id;
     const user = getUserById(id);
     if (!user) {
-      res.redirect(routes.login)
+      res.redirect(routes.login);
     }
     res.render('urls_new');
   });
@@ -214,10 +214,10 @@ function appGets() {
   app.get(routes.urls + "/:shortURL", (req, res) => {
     const id = req.params.shortURL;
     const userId = req.cookies.user_id;
-    const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase)
+    const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
 
     if (!doesUserOwnUrl) {
-      res.redirect(routes.urls)
+      res.redirect(routes.urls);
     }
   
     const templateVars = {
@@ -290,27 +290,27 @@ function getUrlsForUserID(userId, urlDb) {
     }
   }
   return urls;
-};
+}
 
 function login(req,res) {
   const {email, password} = req.body;
   const userExists = doesUserExist(email, userDatabase);
   if (!userExists) {
     res.statusCode = 400;
-    res.json({err: 'No User Found'})
+    res.json({err: 'No User Found'});
     return;
   }
   const user = getUserByEmail(email, userDatabase);
   if (user.password !== password) {
     res.statusCode = 400;
-    res.json({err: 'Wrong Password'})
+    res.json({err: 'Wrong Password'});
     return;
   }
   res.cookie('user_id', user.id);
   res.redirect(routes.urls);
-};
+}
 
-function getUserByEmail(email, userDB){
+function getUserByEmail(email, userDB) {
   for (const id in userDB) {
     if (userDB[id].email === email) {
       return userDB[id];
@@ -319,29 +319,29 @@ function getUserByEmail(email, userDB){
   return false;
 }
 
-function getUserById(id){
+function getUserById(id) {
   return userDatabase[id];
 }
 
 function createUser(email, password) {
-  const existsAlready = doesUserExist(email, userDatabase)
+  const existsAlready = doesUserExist(email, userDatabase);
   if (existsAlready || !email || !password) return false;
 
-  const id = generateRandomString(12)
+  const id = generateRandomString(12);
   userDatabase[id] = {
     id: id,
     email: email,
     password: password
-  }
+  };
   const gotCreated = email === userDatabase[id].email;
   return gotCreated ? id : false;
-};
+}
 
 function doesUserExist(email, userDB) {
   for (const id in userDB) {
-      if (userDB[id].email === email) {
-        return true;
-      }
+    if (userDB[id].email === email) {
+      return true;
+    }
   }
   return false;
 }
