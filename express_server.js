@@ -10,6 +10,7 @@ const routes = {
   main: '/',
   urls: '/urls',
   urlsDbg: '/urls.json',
+  login: '/login',
 };
 
 const urlDatabase = {
@@ -31,6 +32,12 @@ app.listen(PORT, () => {
 });
 
 function appPosts() {
+
+  app.post(routes.login, (req, res) => {
+    res.cookie('username', req.body.username);
+    res.redirect(routes.urls);
+  });
+
   app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
     let shortURL = req.params.shortURL;
 
@@ -74,7 +81,10 @@ function appGets() {
   });
 
   app.get(routes.urls, (req, res) => {
-    const templateVars = {urls: urlDatabase};
+    const templateVars = {
+      username: req.cookies.username,
+      urls: urlDatabase
+    };
   
     res.render('urls_index', templateVars);
   });
@@ -88,6 +98,7 @@ function appGets() {
       res.redirect(longURL);
     } else {
       const templateVars = {
+        username: req.cookies.username,
         redirect: routes.urls,
         redirectText: 'List of Your Urls',
         display: 'No Shortened Url found',
@@ -102,6 +113,7 @@ function appGets() {
     const id = req.params.shortURL;
   
     const templateVars = {
+      username: req.cookies.username,
       shortURL: id,
       longURL: urlDatabase[id],
     };
@@ -110,6 +122,7 @@ function appGets() {
       res.render('url_show',templateVars);
     } else {
       const templateVars = {
+        username: req.cookies.username,
         redirect: routes.urls,
         redirectText: 'List of Valid Urls',
         display: 'No Url found',
