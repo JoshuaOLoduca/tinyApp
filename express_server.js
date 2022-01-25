@@ -5,7 +5,16 @@ const { resolveInclude } = require("ejs");
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session')
 const { use } = require("express/lib/router");
-const bcrypt = require('bcryptjs');
+const {
+  createUser,
+  getUserById,
+  getUserByEmail,
+  generateRandomString,
+  getUrlsForUserID,
+  doesUserExist,
+  doesUserOwn,
+  } = require('./helpers');
+const { bcrypt, salt} = require('./myBcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -18,7 +27,6 @@ const routes = {
   register: '/register',
 };
 
-const salt = bcrypt.genSaltSync(10);
 
 const urlDatabase = {
   b6UTxQ: {
@@ -66,8 +74,9 @@ function appPosts() {
   
   app.post(routes.register, (req, res) => {
     const {email, password} = req.body;
-    const userId = createUser(email, password);
+    const userId = createUser(email, password, userDatabase);
 
+    console.log(userDatabase)
     if (userId) {
       req.body.userId = userId;
       return login(req, res);
@@ -88,7 +97,7 @@ function appPosts() {
   app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
     let shortURL = req.params.shortURL;
     const id = req.session.user_id;
-    const user = getUserById(id);
+    const user = getUserById(id, userDatabase);
     const usersUrl = urlDatabase[shortURL];
 
     // if user isnt logged in
@@ -113,7 +122,7 @@ function appPosts() {
     let longURL = req.body.longURL;
 
     const id = req.session.user_id;
-    const user = getUserById(id);
+    const user = getUserById(id, userDatabase);
     const usersUrl = urlDatabase[shortURL];
 
     // if user isnt logged in
@@ -141,7 +150,7 @@ function appPosts() {
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
     const userID = req.session.user_id;
-    const user = getUserById(userID);
+    const user = getUserById(userID, userDatabase);
     const id = generateRandomString();
 
     if (!user) {
@@ -178,7 +187,7 @@ function appGets() {
 
   app.get(routes.urls + '/new', (req, res) => {
     const id = req.session.user_id;
-    const user = getUserById(id);
+    const user = getUserById(id, userDatabase);
     if (!user) {
       res.redirect(routes.login);
       return;
@@ -189,7 +198,7 @@ function appGets() {
   app.get(routes.urls, (req, res) => {
     const id = req.session.user_id;
     const templateVars = {
-      user: getUserById(id),
+      user: getUserById(id, userDatabase),
       urls: getUrlsForUserID(id, urlDatabase)
     };
   
@@ -206,7 +215,7 @@ function appGets() {
       res.redirect(longURL);
     } else {
       const templateVars = {
-        user: getUserById(req.session.user_id),
+        user: getUserById(req.session.user_id, userDatabase),
         redirect: routes.urls,
         redirectText: 'List of Your Urls',
         display: 'No Shortened Url found',
@@ -226,7 +235,7 @@ function appGets() {
     }
   
     const templateVars = {
-      user: getUserById(req.session.user_id),
+      user: getUserById(req.session.user_id, userDatabase),
       shortURL: id,
       longURL: urlDatabase[id].longURL,
     };
@@ -235,7 +244,7 @@ function appGets() {
       res.render('url_show',templateVars);
     } else {
       const templateVars = {
-        user: getUserById(req.session.user_id),
+        user: getUserById(req.session.user_id, userDatabase),
         redirect: routes.urls,
         redirectText: 'List of Valid Urls',
         display: 'No Url found',
@@ -254,49 +263,9 @@ function appGets() {
   });
 
 }
-function generateRandomString(length = 6) {
-  const chars = 'abcdefgh1jklmnopqrstuvwxyz'.split('');
-  const numbers = '0123456789'.split('');
-  let randomString = '';
-
-  for (let i = 0; i < length; i++) {
-    let nextIsChar = randomBool();
-
-    if (nextIsChar) {
-      let charIndex = randomNumberInclusive(25);
-      let upperCase = randomBool();
-
-      if (upperCase) {
-        randomString += chars[charIndex].toUpperCase();
-      } else {
-        randomString += chars[charIndex];
-      }
-      continue;
-    }
-    let numIndex = randomNumberInclusive(9);
-    randomString += numbers[numIndex];
-  }
-
-  return randomString;
-
-}
 // ///////////////////
 // HELPERS
 // ///////////////////
-function doesUserOwn(userId, shortId, urlDb) {
-  return urlDb[shortId].userID === userId;
-}
-
-function getUrlsForUserID(userId, urlDb) {
-  const urls = {};
-  for (const id in urlDb) {
-    if (urlDb[id].userID === userId) {
-      urls[id] = urlDb[id];
-    }
-  }
-  return urls;
-}
-
 function login(req,res) {
   const {email, password} = req.body;
   const userExists = doesUserExist(email, userDatabase);
@@ -315,52 +284,7 @@ function login(req,res) {
   res.redirect(routes.urls);
 }
 
-function getUserByEmail(email, userDB) {
-  for (const id in userDB) {
-    if (userDB[id].email === email) {
-      return userDB[id];
-    }
-  }
-  return false;
-}
-
-function getUserById(id) {
-  return userDatabase[id];
-}
-
-function createUser(email, password) {
-  const existsAlready = doesUserExist(email, userDatabase);
-  if (existsAlready || !email || !password) return false;
-
-  const id = generateRandomString(12);
-  userDatabase[id] = {
-    id: id,
-    email: email,
-    password:  bcrypt.hashSync(password, salt)
-  };
-  const gotCreated = email === userDatabase[id].email;
-  return gotCreated ? id : false;
-}
-
-function doesUserExist(email, userDB) {
-  for (const id in userDB) {
-    if (userDB[id].email === email) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function notFoundRedirect(resp, templateVars, page = '404_url') {
   resp.statusCode = 404;
   resp.render(page, templateVars);
-}
-
-function randomBool() {
-  return Math.floor(Math.random() * 2) ? true : false;
-}
-
-// returns a result from 0 to, and including, num
-function randomNumberInclusive(num) {
-  return Math.floor(Math.random() * (num + 1));
 }
