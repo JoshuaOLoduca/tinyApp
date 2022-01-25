@@ -83,9 +83,24 @@ function appPosts() {
 
   app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
     let shortURL = req.params.shortURL;
+    const id = req.cookies.user_id;
+    const user = getUserById(id);
+    const usersUrl = urlDatabase[shortURL];
 
+    // if user isnt logged in
+    if(!user) {
+      res.statusCode = 401;
+      res.redirect(routes.login);
+      return;
+    }
+
+    if (usersUrl.userID !== id) {
+      res.statusCode = 401;
+      res.redirect(routes.urls);
+      return;
+    }
+    
     delete urlDatabase[shortURL];
-
     res.redirect(routes.urls);
   });
 
@@ -93,24 +108,52 @@ function appPosts() {
     let shortURL = req.params.shortURL;
     let longURL = req.body.longURL;
 
+    const id = req.cookies.user_id;
+    const user = getUserById(id);
+    const usersUrl = urlDatabase[shortURL];
+
+    // if user isnt logged in
+    if(!user) {
+      res.statusCode = 401;
+      res.redirect(routes.login);
+      return;
+    }
+
+    if (usersUrl.userID !== id) {
+      res.statusCode = 401;
+      res.redirect(routes.urls);
+      return;
+    }
+
     if (!longURL.includes('://')) {
       longURL = 'http://' + longURL;
     }
 
-    urlDatabase[shortURL] = longURL;
+    urlDatabase[shortURL].longURL = longURL;
 
     res.redirect(`${routes.urls}/${shortURL}`);
   });
 
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
+    const userID = req.cookies.user_id;
+    const user = getUserById(userID)
     const id = generateRandomString();
+
+    if (!user) {
+      res.statusCode = 401;
+      res.redirect(routes.register);
+      return;
+    }
     
     if (!longURL.includes('://')) {
       longURL = 'http://' + longURL;
     }
     
-    urlDatabase[id] = longURL;
+    urlDatabase[id] = {
+      longURL: longURL,
+      userID: userID
+    };
     
     res.statusCode = 302;
     res.redirect(`${routes.urls}/${id}`);
@@ -169,13 +212,18 @@ function appGets() {
   });
   
   app.get(routes.urls + "/:shortURL", (req, res) => {
-  
     const id = req.params.shortURL;
+    const userId = req.cookies.user_id;
+    const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase)
+
+    if (!doesUserOwnUrl) {
+      res.redirect(routes.urls)
+    }
   
     const templateVars = {
       user: getUserById(req.cookies.user_id),
       shortURL: id,
-      longURL: urlDatabase[id],
+      longURL: urlDatabase[id].longURL,
     };
   
     if (templateVars.longURL) {
@@ -230,6 +278,10 @@ function generateRandomString(length = 6) {
 // ///////////////////
 // HELPERS
 // ///////////////////
+function doesUserOwn(userId, shortId, urlDb) {
+  return urlDb[shortId].userID === userId;
+}
+
 function getUrlsForUserID(userId, urlDb) {
   const urls = {};
   for (const id in urlDb) {
