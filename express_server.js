@@ -54,13 +54,24 @@ function appPosts() {
     const {email, password} = req.body;
     const userId = createUser(email, password, userDatabase);
 
+    if (!email || !password) {
+      res.statusCode = 403;
+      renderErrorPage(req,res,
+        {url: routes.register,
+        message: 'Retry Register'},
+        'Email and password MUST BE FILLED');
+    }
+
     console.log(userDatabase)
     if (userId) {
       req.body.userId = userId;
       return login(req, res);
     }
-    req.statusCode = 400;
-    res.json({err: 'User wasnt created'});
+    res.statusCode = 400;
+    renderErrorPage(req,res,
+      {url: routes.register,
+      message: 'Retry Register'},
+      'User wasnt created');
   });
 
   app.post(routes.login, (req, res) => {
@@ -69,7 +80,7 @@ function appPosts() {
 
   app.post(routes.logout, (req, res) => {
     req.session = null;
-    res.redirect(routes.main);
+    res.redirect(routes.urls);
   });
 
   app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
@@ -80,14 +91,12 @@ function appPosts() {
 
     // if user isnt logged in
     if (!user) {
-      req.statusCode = 401;
-      res.redirect(routes.login);
+      redirectAnonUserToError(req, res)
       return;
     }
 
     if (usersUrl.userID !== id) {
-      req.statusCode = 401;
-      res.redirect(routes.urls);
+      redirectDoNotOwn(req, res);
       return;
     }
     
@@ -105,13 +114,13 @@ function appPosts() {
 
     // if user isnt logged in
     if (!user) {
-      req.statusCode = 401;
+      res.statusCode = 401;
       res.redirect(routes.login);
       return;
     }
 
     if (usersUrl.userID !== id) {
-      req.statusCode = 401;
+      res.statusCode = 401;
       res.redirect(routes.urls);
       return;
     }
@@ -122,7 +131,7 @@ function appPosts() {
 
     urlDatabase[shortURL].longURL = longURL;
 
-    res.redirect(`${routes.urls}/${shortURL}`);
+    res.redirect(`${routes.urls}`);
   });
 
   app.post(routes.urls, (req, res) => {
@@ -131,23 +140,33 @@ function appPosts() {
     const user = getUserById(userID, userDatabase);
 
     if (!user) {
-      req.statusCode = 401;
+      res.statusCode = 401;
       redirectAnonUserToError(req, res)
       return;
     }
     const id = addUrlToDatabase(userID, longURL, urlDatabase)
     
-    req.statusCode = 302;
+    res.statusCode = 302;
     res.redirect(`${routes.urls}/${id}`);
   });
 }
 
 function appGets() {
   app.get(routes.login, (req, res) => {
+    const userID = req.session.user_id;
+    const user = getUserById(userID,userDatabase)
+
+    if (user) return res.redirect(routes.urls)
+
     res.render('login');
   });
 
   app.get(routes.register, (req, res) => {
+    const userID = req.session.user_id;
+    const user = getUserById(userID,userDatabase)
+
+    if (user) return res.redirect(routes.urls)
+    
     res.render('register');
   });
 
@@ -158,7 +177,7 @@ function appGets() {
       res.redirect(routes.login);
       return;
     }
-    res.render('urls_new');
+    res.render('urls_new', {user});
   });
 
   app.get(routes.urls, (req, res) => {
@@ -181,10 +200,10 @@ function appGets() {
     
     if (urlDatabase[shortURL]) {
       const longURL = urlDatabase[shortURL].longURL;
-      req.statusCode = 302;
+      res.statusCode = 302;
       res.redirect(longURL);
     } else {
-      req.statusCode = 404;
+      res.statusCode = 404;
       renderErrorPage(req, res, {
         url: routes.urls,
         message: 'List of Your Urls'
@@ -206,20 +225,14 @@ function appGets() {
     }
 
     if (!doesUserOwnUrl) {
-      req.statusCode = 401;
-      renderErrorPage(req, res,
-        {
-          url: routes.urls,
-          message: 'List of Your Urls'
-        },
-        'You dont own this url'
-        );
+      redirectDoNotOwn(req, res)
     }
   
     const templateVars = {
       user: getUserById(req.session.user_id, userDatabase),
       shortURL: id,
       longURL: urlDatabase[id].longURL,
+      domain: req.get('host')
     };
   
     res.render('url_show',templateVars);
@@ -247,22 +260,39 @@ function login(req,res) {
   const {email, password} = req.body;
   const userExists = doesUserExist(email, userDatabase);
   if (!userExists) {
-    req.statusCode = 400;
-    res.json({err: 'No User Found'});
+    res.statusCode = 404;
+    renderErrorPage(req,res,
+      {url: routes.login,
+      message: 'Retry Login'},
+      'No Email found');
     return;
   }
   const user = getUserByEmail(email, userDatabase);
   if (!bcrypt.compareSync(password, user.password)) {
-    req.statusCode = 400;
-    res.json({err: 'Wrong Password'});
+    res.statusCode = 401;
+    renderErrorPage(req,res,
+      {url: routes.login,
+      message: 'Retry Login'},
+      'Wrong Password');
     return;
   }
   req.session.user_id = user.id;
   res.redirect(routes.urls);
 }
 
+function redirectDoNotOwn(req, res) {
+  res.statusCode = 401;
+  renderErrorPage(req, res,
+    {
+      url: routes.urls,
+      message: 'List of Your Urls'
+    },
+    'You dont own this url'
+    );
+}
+
 function redirectAnonUserToError(req, res) {
-  req.statusCode = 403;
+  res.statusCode = 403;
   renderErrorPage(req, res,
     {
       url: routes.login,
@@ -273,13 +303,12 @@ function redirectAnonUserToError(req, res) {
 }
 
 function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') {
-  console.log(req.statusCode);
   const templateVars = {
     user: getUserById(
       req.session.user_id, userDatabase),
     redirect: redirect.url,
     redirectText: redirect.message,
-    display: `${req.statusCode} - ${errorMessage}`,
+    display: `${resp.statusCode} - ${errorMessage}`,
   };
   resp.render(page, templateVars);
 }

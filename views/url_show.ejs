@@ -13,7 +13,7 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h4 class="card-title">TinyURL for: <%= longURL %></h4>
-        <p class="card-text">Short URL: <a href="/<%= shortURL %>"><%= shortURL %></a></p>
+        <p class="card-text">Short URL: <a href="/<%= shortURL %>"><%= domain %>/<%= shortURL %></a></p>
       </div>
       <div class="card-footer text-muted">
         <h2 class="card-title font-weight-bold">Edit</h2>
@@ -24,7 +24,7 @@
   
             <input type="text" name="longURL" placeholder="http://www.example.com">
   
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <button class="btn btn-primary" type="submit">Update</button>
           </div>
         </form>
     </div>
