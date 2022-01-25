@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { resolveInclude } = require("ejs");
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const { use } = require("express/lib/router");
 const bcrypt = require('bcryptjs');
 const app = express();
@@ -46,6 +47,11 @@ const userDatabase = {
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['This key is very short and super easy to crack password1234'],
+  maxAge: 2 * 60 * 60 * 1000 // 2 hours
+}));
 
 // needs to be before /:shortURL
 
@@ -75,13 +81,13 @@ function appPosts() {
   });
 
   app.post(routes.logout, (req, res) => {
-    res.clearCookie('user_id');
+    req.session = null;
     res.redirect(routes.urls);
   });
 
   app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
     let shortURL = req.params.shortURL;
-    const id = req.cookies.user_id;
+    const id = req.session.user_id;
     const user = getUserById(id);
     const usersUrl = urlDatabase[shortURL];
 
@@ -106,7 +112,7 @@ function appPosts() {
     let shortURL = req.params.shortURL;
     let longURL = req.body.longURL;
 
-    const id = req.cookies.user_id;
+    const id = req.session.user_id;
     const user = getUserById(id);
     const usersUrl = urlDatabase[shortURL];
 
@@ -134,7 +140,7 @@ function appPosts() {
 
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
-    const userID = req.cookies.user_id;
+    const userID = req.session.user_id;
     const user = getUserById(userID);
     const id = generateRandomString();
 
@@ -171,7 +177,7 @@ function appGets() {
   });
 
   app.get(routes.urls + '/new', (req, res) => {
-    const id = req.cookies.user_id;
+    const id = req.session.user_id;
     const user = getUserById(id);
     if (!user) {
       res.redirect(routes.login);
@@ -181,7 +187,7 @@ function appGets() {
   });
 
   app.get(routes.urls, (req, res) => {
-    const id = req.cookies.user_id;
+    const id = req.session.user_id;
     const templateVars = {
       user: getUserById(id),
       urls: getUrlsForUserID(id, urlDatabase)
@@ -200,7 +206,7 @@ function appGets() {
       res.redirect(longURL);
     } else {
       const templateVars = {
-        user: getUserById(req.cookies.user_id),
+        user: getUserById(req.session.user_id),
         redirect: routes.urls,
         redirectText: 'List of Your Urls',
         display: 'No Shortened Url found',
@@ -212,7 +218,7 @@ function appGets() {
   
   app.get(routes.urls + "/:shortURL", (req, res) => {
     const id = req.params.shortURL;
-    const userId = req.cookies.user_id;
+    const userId = req.session.user_id;
     const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
 
     if (!doesUserOwnUrl) {
@@ -220,7 +226,7 @@ function appGets() {
     }
   
     const templateVars = {
-      user: getUserById(req.cookies.user_id),
+      user: getUserById(req.session.user_id),
       shortURL: id,
       longURL: urlDatabase[id].longURL,
     };
@@ -229,7 +235,7 @@ function appGets() {
       res.render('url_show',templateVars);
     } else {
       const templateVars = {
-        user: getUserById(req.cookies.user_id),
+        user: getUserById(req.session.user_id),
         redirect: routes.urls,
         redirectText: 'List of Valid Urls',
         display: 'No Url found',
@@ -305,7 +311,7 @@ function login(req,res) {
     res.json({err: 'Wrong Password'});
     return;
   }
-  res.cookie('user_id', user.id);
+  req.session.user_id = user.id;
   res.redirect(routes.urls);
 }
 
