@@ -11,6 +11,7 @@ const routes = {
   urls: '/urls',
   urlsDbg: '/urls.json',
   login: '/login',
+  logout: '/logout',
 };
 
 const urlDatabase = {
@@ -35,6 +36,11 @@ function appPosts() {
 
   app.post(routes.login, (req, res) => {
     res.cookie('username', req.body.username);
+    res.redirect(routes.urls);
+  });
+
+  app.post(routes.logout, (req, res) => {
+    res.clearCookie('username');
     res.redirect(routes.urls);
   });
 

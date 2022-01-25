@@ -15,7 +15,10 @@
         <button type="submit">Set Username</button>
       </form>
       <% } else { %>
-        <span>Welcome <%= username %> </span>
+        <span>Welcome <%= username %></span>
+        <form method="POST" action="/logout">
+          <button type="submit">Logout</button>
+        </form>
         <% } %> 
     </div>
   </nav>
