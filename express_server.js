@@ -202,6 +202,10 @@ function appGets() {
       user: getUserById(id, userDatabase),
       urls: getUrlsForUserID(id, urlDatabase)
     };
+
+    if (!id) {
+      redirectAnonUserToError(req, res)
+    }
   
     res.render('urls_index', templateVars);
   });
@@ -221,7 +225,7 @@ function appGets() {
         redirectText: 'List of Your Urls',
         display: 'No Shortened Url found',
       };
-      notFoundRedirect(res, templateVars);
+      renderErrorPage(res, templateVars);
     }
   
   });
@@ -233,19 +237,12 @@ function appGets() {
     const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
 
     if (!userId) {
-      req.statusCode = 403;
-      notFoundRedirect(req, res,
-        {
-          url: routes.login,
-          message: 'Login Here'
-        },
-        'You are not logged in'
-        );
+      redirectAnonUserToError(req, res)
     }
 
     if (!doesUserOwnUrl) {
       req.statusCode = 401;
-      notFoundRedirect(req, res,
+      renderErrorPage(req, res,
         {
           url: routes.urls,
           message: 'List of Your Urls'
@@ -299,7 +296,18 @@ function login(req,res) {
   res.redirect(routes.urls);
 }
 
-function notFoundRedirect(req, resp, redirect, errorMessage, page = 'error_url') {
+function redirectAnonUserToError(req, res) {
+  req.statusCode = 403;
+  renderErrorPage(req, res,
+    {
+      url: routes.login,
+      message: 'Login Here'
+    },
+    'You are not logged in'
+    );
+}
+
+function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') {
   console.log(req.statusCode);
   const templateVars = {
     user: getUserById(
