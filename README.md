@@ -33,7 +33,6 @@ App is fully functional (except doesnt support persistant data)
 - Express
 - EJS
 - bcrypt
-- body-parser
 - cookie-session
 
 ## Getting Started
