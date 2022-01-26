@@ -1,5 +1,7 @@
 const {bcrypt, salt} = require('./myBcrypt');
 
+// Used to hold our psuedo databases for the project
+
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -30,4 +32,4 @@ const userDatabase = {
   }
 };
 
-module.exports = {urlDatabase, userDatabase}
+module.exports = {urlDatabase, userDatabase};

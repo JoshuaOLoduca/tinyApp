@@ -1,5 +1,11 @@
+// Used to configure express before use
+// and to hold other config esk vars
+
 const express = require("express");
 const cookieSession = require('cookie-session');
+
+const app = express();
+const PORT = 8080; // default port 8080
 
 const routes = {
   main: '/',
@@ -9,9 +15,6 @@ const routes = {
   logout: '/logout',
   register: '/register',
 };
-
-const app = express();
-const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: true}));

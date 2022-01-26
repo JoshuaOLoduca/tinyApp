@@ -25,15 +25,13 @@ const {
   PORT
 } = require('./configuration');
 
-// needs to be before /:shortURL
-
 routesAccountManagement();
 routesUrlManagement();
 routesMainPurpose();
 
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 function routesMainPurpose() {
