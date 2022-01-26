@@ -2,7 +2,7 @@
 // and to hold other config esk vars
 
 const express = require("express");
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
 
 const app = express();
@@ -19,7 +19,7 @@ const routes = {
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: true}));
-app.use(methodOverride('_method'))
+app.use(methodOverride('_method'));
 app.use(cookieSession({
   name: 'session',
   keys: ['This key is very short and super easy to crack password1234'],
