@@ -64,4 +64,4 @@ function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') 
   resp.render(page, templateVars);
 }
 
-module.exports = {renderErrorPage, redirectAnonUserToError, redirectDoNotOwn, login}
+module.exports = {renderErrorPage, redirectAnonUserToError, redirectDoNotOwn, login};

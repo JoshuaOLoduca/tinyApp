@@ -9,7 +9,7 @@ const {
 const {
   renderErrorPage,
   redirectAnonUserToError,
-  redirectDoNotOwn, 
+  redirectDoNotOwn,
   login
 } = require('./expressHelpers');
 
@@ -26,9 +26,9 @@ const {
 
 // needs to be before /:shortURL
 
-routesAccountManagement()
-routesUrlManagement()
-routesMainPurpose()
+routesAccountManagement();
+routesUrlManagement();
+routesMainPurpose();
 
 
 app.listen(PORT, () => {
@@ -130,7 +130,7 @@ function routesAccountManagement() {
     req.session = null;
     res.redirect(routes.urls);
   });
-};
+}
 
 function routesUrlManagement() {
 

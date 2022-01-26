@@ -1,4 +1,4 @@
-const { bcrypt, salt} = require('./myBcrypt');
+const { bcrypt, salt } = require('./myBcrypt');
 
 function doesUserOwn(userId, shortId, urlDb) {
   if (!urlDb[shortId]) return false;
@@ -14,7 +14,6 @@ function getUrlsForUserID(userId, urlDb) {
   }
   return urls;
 }
-
 
 function getUserByEmail(email, userDB) {
   for (const id in userDB) {
@@ -37,7 +36,7 @@ function createUser(email, password, userDb) {
   userDb[id] = {
     id: id,
     email: email,
-    password:  bcrypt.hashSync(password, salt)
+    password: bcrypt.hashSync(password, salt)
   };
   const gotCreated = email === userDb[id].email;
   return gotCreated ? id : false;
@@ -115,4 +114,4 @@ module.exports = {
   doesUserExist,
   doesUserOwn,
   addUrlToDatabase,
-  }
+};

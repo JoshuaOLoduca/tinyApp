@@ -21,4 +21,4 @@ app.use(cookieSession({
   maxAge: 2 * 60 * 60 * 1000 // 2 hours
 }));
 
-module.exports = {routes, PORT, app}
+module.exports = {routes, PORT, app};
