@@ -29,11 +29,16 @@ App is fully functional (except doesnt support persistant data)
   - Dashboard of users urls
 ## Dependencies
 
-- Node.js
-- Express
-- EJS
-- bcrypt
-- cookie-session
+- Required
+  - [Node.js](https://nodejs.org/en/)
+  - [Express](https://expressjs.com/)
+  - [EJS](https://ejs.co/)
+  - [bcryptjs](https://www.npmjs.com/package/bcryptjs)
+  - [cookie-session](https://www.npmjs.com/package/cookie-session)
+- Dev
+  - [Chai](https://www.npmjs.com/package/chai)
+  - [Mocha](https://www.npmjs.com/package/mocha)
+  - [Nodemon](https://www.npmjs.com/package/nodemon)
 
 ## Getting Started
 
