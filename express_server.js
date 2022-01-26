@@ -4,6 +4,7 @@ const {
   getUrlsForUserID,
   doesUserOwn,
   addUrlToDatabase,
+  doesUserExist,
 } = require('./helpers/dbHelpers');
 
 const {
@@ -11,7 +12,7 @@ const {
   redirectAnonUserToError,
   redirectDoNotOwn,
   login,
-  redirectToLongUrl
+  redirectToLongUrl,
 } = require('./helpers/expressHelpers');
 
 const {
@@ -105,6 +106,16 @@ function routesAccountManagement() {
         'Email and password MUST BE FILLED');
       return;
     }
+    const userExists = doesUserExist(email, userDatabase);
+
+    if (userExists) {
+      res.statusCode = 401;
+      renderErrorPage(req,res,
+        {url: routes.register,
+          message: 'Retry Register'},
+        'Email already in use');
+      return;
+    }
 
     // Tries to create account for user.
     // returns userID if successful
@@ -114,6 +125,7 @@ function routesAccountManagement() {
     if (userId) {
       req.body.userId = userId;
       login(req, res);
+      return;
     }
   });
 
