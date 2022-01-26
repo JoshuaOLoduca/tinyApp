@@ -23,7 +23,6 @@ app.use(methodOverride('_method'))
 app.use(cookieSession({
   name: 'session',
   keys: ['This key is very short and super easy to crack password1234'],
-  maxAge: 2 * 60 * 60 * 1000 // 2 hours
 }));
 
 module.exports = {routes, PORT, app};

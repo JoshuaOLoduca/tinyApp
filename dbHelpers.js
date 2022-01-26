@@ -152,4 +152,5 @@ module.exports = {
   doesUserExist,
   doesUserOwn,
   addUrlToDatabase,
+  generateRandomString,
 };

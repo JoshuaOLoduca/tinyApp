@@ -12,15 +12,39 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h4 class="card-title">TinyURL for: <%= urlData.longURL %></h4>
+        <h4 class="card-title">TinyURL for: <a href='<%= urlData.longURL %>'><%= urlData.longURL %></a></h4>
         
         <p class="card-text">Short URL: <a href="/<%= shortURL %>"><%= domain %>/<%= shortURL %></a></p>
 
+        <p class="card-text">Created: <%= urlData.created %></a></p>
+
         <p class="card-text">Unique Users: <%= urlData.uniqueVisitors.length %>
 
-        <p class="card-text">Total Uses: <%= urlData.totalVisits %></p>
+        <h3 class="card-text mt-5">Total Uses:</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for (const visitor of urlData.totalVisits) {%>
+                <tr>
+                  <!-- ID -->
+                  <td>
+                    <%= visitor.id  %> 
+                  </td>
 
-        <p class="card-text">Created: <%= urlData.created %></a></p>
+                  <!-- Date -->
+                  <td>
+                    <%= visitor.date  %> 
+                  </td>
+
+                </tr>
+                <% } %> 
+            </tbody>
+          </table>
 
       </div>
       <div class="card-footer text-muted">

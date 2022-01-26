@@ -2,6 +2,7 @@ const {
   getUserById,
   getUserByEmail,
   doesUserExist,
+  generateRandomString,
 } = require('./dbHelpers');
 const {
   urlDatabase,
@@ -78,18 +79,38 @@ function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') 
 
 function redirectToLongUrl(req, res, shortURL) {
   const longURL = urlDatabase[shortURL].longURL;
-  // gets ip to track unique visitors
-  const ip = req.ip;
-  const isUniqueVisitor = !urlDatabase[shortURL].uniqueVisitors.includes(ip);
+  
+  // manages users unique id
+  giveUniqueID(req);
+  const uid = req.session.UID;
 
-  urlDatabase[shortURL].totalVisits++;
+  // checks to see if user has been tracked as unique visitor
+  const isUniqueVisitor = !urlDatabase[shortURL].uniqueVisitors.includes(uid);
+
+  // add use to database
+  urlDatabase[shortURL].totalVisits.push({
+    id: uid,
+    date: Date(Date.now()),
+  });
   
   if (isUniqueVisitor) {
     // add IP if visitor is unique
-    urlDatabase[shortURL].uniqueVisitors.push(req.ip);
+    urlDatabase[shortURL].uniqueVisitors.push(uid);
   }
   res.statusCode = 302;
   res.redirect(longURL);
+}
+
+// gives user "unique" id if they dont have it
+function giveUniqueID(req) {
+  const uid = req.session.UID;
+  // if they have it, return
+  if (uid) return;
+
+  // if not, set it
+  // random string variation for length of 12 is
+  // 3.2262668e+21
+  req.session.UID = generateRandomString(12);
 }
 
 module.exports = {renderErrorPage, redirectAnonUserToError, redirectDoNotOwn, login, redirectToLongUrl};

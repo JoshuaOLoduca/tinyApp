@@ -7,14 +7,14 @@ const urlDatabase = {
     longURL: "https://www.tsn.ca",
     userID: "aJ48lW",
     uniqueVisitors: [],
-    totalVisits: 0,
+    totalVisits: [],
     created: Date(Date.now())
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
     uniqueVisitors: [],
-    totalVisits: 0,
+    totalVisits: [],
     created: Date(Date.now())
   }
 };
