@@ -4,7 +4,7 @@ const {
   doesUserExist,
 } = require('./dbHelpers');
 const {bcrypt} = require('./myBcrypt');
-const {userDatabase} = require('./databases');
+const {urlDatabase, userDatabase} = require('./databases');
 const {routes} = require('./configuration');
 
 function login(req,res) {
@@ -64,4 +64,19 @@ function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') 
   resp.render(page, templateVars);
 }
 
-module.exports = {renderErrorPage, redirectAnonUserToError, redirectDoNotOwn, login};
+function redirectToLongUrl(req, res, shortURL) {
+  const longURL = urlDatabase[shortURL].longURL;
+  const ip = req.ip;
+  const isUniqueVisitor = !urlDatabase[shortURL].uniqueVisitors.includes(ip);
+
+  urlDatabase[shortURL].totalVisits++;
+  
+  if (isUniqueVisitor) {
+    urlDatabase[shortURL].uniqueVisitors.push(req.ip);
+  }
+  res.statusCode = 302;
+  res.redirect(longURL);
+  return;
+}
+
+module.exports = {renderErrorPage, redirectAnonUserToError, redirectDoNotOwn, login, redirectToLongUrl};
