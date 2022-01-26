@@ -8,7 +8,7 @@ const {
   urlDatabase,
   userDatabase
 } = require('./databases');
-const { bcrypt } = require('./myBcrypt');
+const { bcrypt } = require('./bcryptHelper');
 const { routes } = require('./configuration');
 
 function login(req,res) {

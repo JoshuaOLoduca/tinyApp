@@ -7,7 +7,7 @@ const {
   getUrlsForUserID,
   doesUserExist,
   doesUserOwn,
-  } = require('../dbHelpers.js');
+  } = require('../helpers/dbHelpers.js');
 
 const testUsers = {
   "userRandomID": {

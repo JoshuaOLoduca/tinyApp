@@ -1,4 +1,4 @@
-const { bcrypt, salt } = require('./myBcrypt');
+const { bcrypt, salt } = require('./bcryptHelper');
 
 // Checks to see if user owns shortUrl
 // returns true/false

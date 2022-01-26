@@ -4,7 +4,7 @@ const {
   getUrlsForUserID,
   doesUserOwn,
   addUrlToDatabase,
-} = require('./dbHelpers');
+} = require('./helpers/dbHelpers');
 
 const {
   renderErrorPage,
@@ -12,7 +12,7 @@ const {
   redirectDoNotOwn,
   login,
   redirectToLongUrl
-} = require('./expressHelpers');
+} = require('./helpers/expressHelpers');
 
 const {
   urlDatabase,

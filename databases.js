@@ -1,4 +1,4 @@
-const {bcrypt, salt} = require('./myBcrypt');
+const {bcrypt, salt} = require('./helpers/bcryptHelper');
 
 // Used to hold our psuedo databases for the project
 
