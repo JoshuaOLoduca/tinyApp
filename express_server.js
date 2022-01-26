@@ -162,7 +162,7 @@ function routesUrlManagement() {
 
   // '/urls/{shortUrlID}/delete'
   // Handles deletion of users short url
-  app.post(`${routes.urls}/:shortURL/delete`, (req, res) => {
+  app.delete(`${routes.urls}/:shortURL`, (req, res) => {
     let shortURL = req.params.shortURL;
     const id = req.session.user_id;
     const user = getUserById(id, userDatabase);
@@ -223,7 +223,7 @@ function routesUrlManagement() {
   });
   // '/urls/{shortURLID}'
   // Lets user update longURL of shortUrl
-  app.post(`${routes.urls}/:shortURL`, (req, res) => {
+  app.put(`${routes.urls}/:shortURL`, (req, res) => {
     let shortURL = req.params.shortURL;
     let longURL = req.body.longURL;
 

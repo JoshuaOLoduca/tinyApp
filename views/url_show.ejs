@@ -26,7 +26,7 @@
       <div class="card-footer text-muted">
         <h2 class="card-title font-weight-bold">Edit</h2>
         
-        <form method="POST" action="/urls/<%= shortURL %>">
+        <form method="POST" action="/urls/<%= shortURL %>?_method=PUT">
           <div class="d-inline-flex p-2" style="gap: 1.2rem;">
             <label class="col-form-label" for="longURL">New Long URL</label>
   
