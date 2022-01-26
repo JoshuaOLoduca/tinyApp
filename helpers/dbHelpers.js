@@ -135,7 +135,7 @@ function addUrlToDatabase(userID, url, urlDb) {
     longURL: url,
     userID: userID,
     uniqueVisitors: [],
-    totalVisits: 0,
+    totalVisits: [],
     created: Date(Date.now())
 
   };

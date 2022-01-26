@@ -7,9 +7,9 @@ const {
 const {
   urlDatabase,
   userDatabase
-} = require('./databases');
+} = require('../databases');
 const { bcrypt } = require('./bcryptHelper');
-const { routes } = require('./configuration');
+const { routes } = require('../configuration');
 
 function login(req,res) {
   const { email, password } = req.body;

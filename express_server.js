@@ -138,7 +138,7 @@ function routesAccountManagement() {
   // Logout
   app.post(routes.logout, (req, res) => {
     // Deletes session cookie
-    req.session = null;
+    req.session.user_id = null;
     res.redirect(routes.urls);
   });
 }
