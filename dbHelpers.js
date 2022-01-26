@@ -111,7 +111,6 @@ module.exports = {
   createUser,
   getUserById,
   getUserByEmail,
-  generateRandomString,
   getUrlsForUserID,
   doesUserExist,
   doesUserOwn,
