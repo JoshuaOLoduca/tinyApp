@@ -1,19 +1,22 @@
 const {
+  urlDatabase,
+  userDatabase
+} = require('../databases');
+
+const { dbHelperWrapper } = require('./dbHelpers');
+const {
   getUserById,
   getUserByEmail,
   doesUserExist,
   generateRandomString,
-} = require('./dbHelpers');
-const {
-  urlDatabase,
-  userDatabase
-} = require('../databases');
+} = dbHelperWrapper(userDatabase, urlDatabase);
+
 const { bcrypt } = require('./bcryptHelper');
 const { routes } = require('../configuration');
 
 function login(req,res) {
   const { email, password } = req.body;
-  const userExists = doesUserExist(email, userDatabase);
+  const userExists = doesUserExist(email);
   // if user email not found
   // show specific error
   if (!userExists) {
@@ -26,7 +29,7 @@ function login(req,res) {
   }
 
   // gets data for accoutn with provided email
-  const user = getUserByEmail(email, userDatabase);
+  const user = getUserByEmail(email);
   // checks to see if hashed password
   // onfile doesnt match user provided one
   if (!bcrypt.compareSync(password, user.password)) {
@@ -67,8 +70,7 @@ function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') 
   // Structure vars so error page can render
   // specific error
   const templateVars = {
-    user: getUserById(
-      req.session.user_id, userDatabase),
+    user: getUserById(req.session.user_id),
     redirect: redirect.url,
     redirectText: redirect.message,
     display: `${resp.statusCode} - ${errorMessage}`,

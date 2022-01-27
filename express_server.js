@@ -1,11 +1,17 @@
 const {
+  urlDatabase,
+  userDatabase
+} = require('./databases');
+
+const { dbHelperWrapper } = require('./helpers/dbHelpers');
+const {
   createUser,
   getUserById,
   getUrlsForUserID,
   doesUserOwn,
   addUrlToDatabase,
   doesUserExist,
-} = require('./helpers/dbHelpers');
+} = dbHelperWrapper(userDatabase, urlDatabase);
 
 const {
   renderErrorPage,
@@ -16,11 +22,6 @@ const {
 } = require('./helpers/expressHelpers');
 
 const {
-  urlDatabase,
-  userDatabase
-} = require('./databases');
-
-const {
   routes,
   app,
   PORT
@@ -29,11 +30,6 @@ const {
 routesAccountManagement();
 routesUrlManagement();
 routesMainPurpose();
-
-
-app.listen(PORT, () => {
-  console.log(`TinyApp listening on port ${PORT}!`);
-});
 
 function routesMainPurpose() {
 
@@ -85,7 +81,7 @@ function routesAccountManagement() {
   // Renders page for user to register
   app.get(routes.register, (req, res) => {
     const userID = req.session.user_id;
-    const user = getUserById(userID,userDatabase);
+    const user = getUserById(userID);
 
     // If user is logged in, redirect to their urls
     if (user) return res.redirect(routes.urls);
@@ -106,7 +102,7 @@ function routesAccountManagement() {
         'Email and password MUST BE FILLED');
       return;
     }
-    const userExists = doesUserExist(email, userDatabase);
+    const userExists = doesUserExist(email);
 
     if (userExists) {
       res.statusCode = 401;
@@ -120,7 +116,7 @@ function routesAccountManagement() {
     // Tries to create account for user.
     // returns userID if successful
     // False if not
-    const userId = createUser(email, password, userDatabase);
+    const userId = createUser(email, password);
 
     if (userId) {
       req.body.userId = userId;
@@ -133,7 +129,7 @@ function routesAccountManagement() {
   // Login
   app.get(routes.login, (req, res) => {
     const userID = req.session.user_id;
-    const user = getUserById(userID,userDatabase);
+    const user = getUserById(userID);
 
     // If user is logged in, redirect to their urls
     if (user) return res.redirect(routes.urls);
@@ -161,7 +157,7 @@ function routesUrlManagement() {
   // lets user create new shortened url
   app.get(routes.urls + '/new', (req, res) => {
     const id = req.session.user_id;
-    const user = getUserById(id, userDatabase);
+    const user = getUserById(id);
     
     // If user not logged in, redirect to login page
     if (!user) {
@@ -177,7 +173,7 @@ function routesUrlManagement() {
   app.delete(`${routes.urls}/:shortURL`, (req, res) => {
     let shortURL = req.params.shortURL;
     const id = req.session.user_id;
-    const user = getUserById(id, userDatabase);
+    const user = getUserById(id);
     const usersUrl = urlDatabase[shortURL];
 
     // if user isnt logged in,
@@ -205,7 +201,7 @@ function routesUrlManagement() {
   app.get(routes.urls + "/:shortURL", (req, res) => {
     const id = req.params.shortURL;
     const userId = req.session.user_id;
-    const doesUserOwnUrl = doesUserOwn(userId, id, urlDatabase);
+    const doesUserOwnUrl = doesUserOwn(userId, id);
 
     // If user isnt logged in,
     // Show them specific error
@@ -223,7 +219,7 @@ function routesUrlManagement() {
   
     // Get data for edit/stat page
     const templateVars = {
-      user: getUserById(req.session.user_id, userDatabase),
+      user: getUserById(req.session.user_id),
       shortURL: id,
       urlData: urlDatabase[id],
       domain: req.get('host')
@@ -240,7 +236,7 @@ function routesUrlManagement() {
     let longURL = req.body.longURL;
 
     const id = req.session.user_id;
-    const user = getUserById(id, userDatabase);
+    const user = getUserById(id);
     const usersUrl = urlDatabase[shortURL];
 
     // If user isnt logged in,
@@ -281,8 +277,8 @@ function routesUrlManagement() {
     }
 
     const templateVars = {
-      user: getUserById(id, userDatabase),
-      urls: getUrlsForUserID(id, urlDatabase)
+      user: getUserById(id),
+      urls: getUrlsForUserID(id)
     };
     res.render('urls_index', templateVars);
   });
@@ -291,7 +287,7 @@ function routesUrlManagement() {
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
     const userID = req.session.user_id;
-    const user = getUserById(userID, userDatabase);
+    const user = getUserById(userID);
     // If user isnt logged in,
     // show specific error
     if (!user) {
@@ -301,10 +297,14 @@ function routesUrlManagement() {
 
     // add url to database and get its,
     // id in return
-    const id = addUrlToDatabase(userID, longURL, urlDatabase);
+    const id = addUrlToDatabase(userID, longURL);
     
     // redirect to url edit/stat page
     res.statusCode = 302;
     res.redirect(`${routes.urls}/${id}`);
   });
 }
+
+app.listen(PORT, () => {
+  console.log(`TinyApp listening on port ${PORT}!`);
+});
