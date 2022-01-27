@@ -70,7 +70,7 @@ function renderErrorPage(req, resp, redirect, errorMessage, page = 'error_url') 
   // Structure vars so error page can render
   // specific error
   const templateVars = {
-    user: getUserById(req.session.user_id),
+    user: req.user,
     redirect: redirect.url,
     redirectText: redirect.message,
     display: `${resp.statusCode} - ${errorMessage}`,

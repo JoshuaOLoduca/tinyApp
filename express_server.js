@@ -35,10 +35,10 @@ function routesMainPurpose() {
 
   // "/"
   app.get(routes.main, (req, res) => {
-    const userId = req.session.user_id;
+    const user = req.user;
 
     // If logged in, direct to users URLs
-    if (userId) {
+    if (!user.isEmpty) {
       return res.redirect(routes.urls);
     }
 
@@ -80,11 +80,10 @@ function routesAccountManagement() {
   // '/register'
   // Renders page for user to register
   app.get(routes.register, (req, res) => {
-    const userID = req.session.user_id;
-    const user = getUserById(userID);
+    const user = req.user;
 
     // If user is logged in, redirect to their urls
-    if (user) return res.redirect(routes.urls);
+    if (!user.isEmpty) return res.redirect(routes.urls);
     
     res.render('register');
   });
@@ -128,11 +127,10 @@ function routesAccountManagement() {
   // '/login'
   // Login
   app.get(routes.login, (req, res) => {
-    const userID = req.session.user_id;
-    const user = getUserById(userID);
+    const user = req.user;
 
     // If user is logged in, redirect to their urls
-    if (user) return res.redirect(routes.urls);
+    if (!user.isEmpty) return res.redirect(routes.urls);
 
     // Otherwise, show login page
     res.render('login');
@@ -156,11 +154,10 @@ function routesUrlManagement() {
   // '/urls/new'
   // lets user create new shortened url
   app.get(routes.urls + '/new', (req, res) => {
-    const id = req.session.user_id;
-    const user = getUserById(id);
+    const user = req.user;
     
     // If user not logged in, redirect to login page
-    if (!user) {
+    if (user.isEmpty) {
       res.redirect(routes.login);
       return;
     }
@@ -172,13 +169,13 @@ function routesUrlManagement() {
   // Handles deletion of users short url
   app.delete(`${routes.urls}/:shortURL`, (req, res) => {
     let shortURL = req.params.shortURL;
-    const id = req.session.user_id;
-    const user = getUserById(id);
+    const user = req.user;
+    const id = user.id;
     const usersUrl = urlDatabase[shortURL];
 
     // if user isnt logged in,
     // Redirect to error page of said issue
-    if (!user) {
+    if (user.isEmpty) {
       redirectAnonUserToError(req, res);
       return;
     }
@@ -200,7 +197,7 @@ function routesUrlManagement() {
   // Shows edit/stat page for shortUrl they own
   app.get(routes.urls + "/:shortURL", (req, res) => {
     const id = req.params.shortURL;
-    const userId = req.session.user_id;
+    const userId = req.user.id;
     const doesUserOwnUrl = doesUserOwn(userId, id);
 
     // If user isnt logged in,
@@ -235,13 +232,13 @@ function routesUrlManagement() {
     let shortURL = req.params.shortURL;
     let longURL = req.body.longURL;
 
-    const id = req.session.user_id;
-    const user = getUserById(id);
+    const user = req.user;
+    const id = user.id;
     const usersUrl = urlDatabase[shortURL];
 
     // If user isnt logged in,
     // Show them specific error
-    if (!user) {
+    if (user.isEmpty) {
       redirectAnonUserToError(req, res);
       return;
     }
@@ -268,7 +265,7 @@ function routesUrlManagement() {
   // /urls
   // shows urls that belong to logged in user
   app.get(routes.urls, (req, res) => {
-    const id = req.session.user_id;
+    const id = req.user.id;
     // If no one is logged in,
     // show specific error
     if (!id) {
@@ -277,20 +274,20 @@ function routesUrlManagement() {
     }
 
     const templateVars = {
-      user: getUserById(id),
+      user: req.user,
       urls: getUrlsForUserID(id)
     };
     res.render('urls_index', templateVars);
   });
   // '/urls'
-  //
+  // Addes Long Url as Short Url to users URLs
   app.post(routes.urls, (req, res) => {
     let longURL = req.body.longURL;
-    const userID = req.session.user_id;
-    const user = getUserById(userID);
+    const user = req.user;
+    const userID = user.id;
     // If user isnt logged in,
     // show specific error
-    if (!user) {
+    if (user.isEmpty) {
       redirectAnonUserToError(req, res);
       return;
     }
